@@ -23,6 +23,8 @@ app.use(express.json());
 const MoviesDB = require("./modules/moviesDB.js");
 const db = new MoviesDB;
 
+console.log(`${process.env.MONGODB_CONN_STRING} is type ${typeof(process.env.MONGODB_CONN_STRING)}`);
+
 db.initialize(process.env.MONGODB_CONN_STRING).then(() => {
     app.listen(HTTP_PORT, () => console.log(`server listening on ${HTTP_PORT}`));
 }).catch((error) => {
