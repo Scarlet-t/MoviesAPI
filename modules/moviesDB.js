@@ -51,10 +51,11 @@ module.exports = class MoviesDB {
   // Pass the connection string to `initialize()`
   initialize(connectionString) {
     return new Promise((resolve, reject) => {
-      mongoose.connect(connectionString);
-
-      this.Movie = mongoose.model("movies", movieSchema);
-      resolve();
+      mongoose.connect(String(connectionString)).then((x) => {
+        this.Movie = mongoose.model("movies", movieSchema);
+        resolve();
+      })
+      .catch(error => reject(error));
     });
   }
 
