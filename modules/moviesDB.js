@@ -1,6 +1,3 @@
-// !!! NOTE !!!
-// I CHANGED THE INITIALIZE FUNCTION AS THE PROVIDED CODE WAS DEPRECIATED
-// I REFERENCED THESE DOCS: https://mongoosejs.com/docs/
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -20,14 +17,14 @@ const movieSchema = new Schema({
   awards: {
     wins: Number,
     nominations: Number,
-    text: String,
+    text: String
   },
   lastupdated: Date,
   year: Number,
   imdb: {
     rating: Number,
     votes: Number,
-    id: Number,
+    id: Number
   },
   countries: [String],
   type: String,
@@ -35,12 +32,13 @@ const movieSchema = new Schema({
     viewer: {
       rating: Number,
       numReviews: Number,
-      meter: Number,
+      meter: Number
     },
     dvd: Date,
-    lastUpdated: Date,
-  },
-});
+    lastUpdated: Date
+  }
+}
+);
 
 module.exports = class MoviesDB {
   constructor() {
@@ -51,11 +49,21 @@ module.exports = class MoviesDB {
   // Pass the connection string to `initialize()`
   initialize(connectionString) {
     return new Promise((resolve, reject) => {
-      mongoose.connect(String(connectionString)).then((x) => {
-        this.Movie = mongoose.model("movies", movieSchema);
+      const db = mongoose.createConnection(
+        connectionString,
+        {
+          useNewUrlParser: true,
+          useUnifiedTopology: true
+        }
+      );
+
+      db.once('error', (err) => {
+        reject(err);
+      });
+      db.once('open', () => {
+        this.Movie = db.model("movies", movieSchema);
         resolve();
-      })
-      .catch(error => reject(error));
+      });
     });
   }
 
@@ -69,16 +77,10 @@ module.exports = class MoviesDB {
     let findBy = title ? { title } : {};
 
     if (+page && +perPage) {
-      return this.Movie.find(findBy)
-        .sort({ year: +1 })
-        .skip((page - 1) * +perPage)
-        .limit(+perPage)
-        .exec();
+      return this.Movie.find(findBy).sort({ year: +1 }).skip((page - 1) * +perPage).limit(+perPage).exec();
     }
 
-    return Promise.reject(
-      new Error("page and perPage query parameters must be valid numbers")
-    );
+    return Promise.reject(new Error('page and perPage query parameters must be valid numbers'));
   }
 
   getMovieById(id) {
@@ -92,4 +94,4 @@ module.exports = class MoviesDB {
   deleteMovieById(id) {
     return this.Movie.deleteOne({ _id: id }).exec();
   }
-};
+}
